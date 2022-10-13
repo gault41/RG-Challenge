@@ -1,21 +1,26 @@
 const assert = require("assert");
 
-const Node = (operator, value, left, right) => {
-  const result = function () {
-    if (operator in operators) {
-      return operators[operator](left.result(), right.result());
-    }
-    else return value;
+const OperatorNode = (operator, left, right) => {
+  const result = function() {
+	  return operators[operator](left.result(), right.result());
   };
-
   return {
     operator,
-    value,
     left,
     right,
     result
   };
-};
+}
+
+const EndNode = (value) => {
+  const result = function() {
+	  return value;
+  };
+  return {
+    value,
+    result
+  };
+}
 
   /**
    * Split out operators to a dictionary to comply with the Open-Closed principle
@@ -94,14 +99,14 @@ class TreeFactory {
         case ')':
           var right = nodeStack.pop();
           var left = nodeStack.pop();
-          nodeStack.push(Node(operatorStack.pop(), null, left, right));
+          nodeStack.push(OperatorNode(operatorStack.pop(), left, right));
           numExpressions--;
           break;
         default:
           if (character in operators) {
             operatorStack.push(character);
           } else {
-            nodeStack.push(Node(null, Number(character), null, null));
+            nodeStack.push(EndNode(Number(character)));
           }
           break;
       }
