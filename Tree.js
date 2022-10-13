@@ -2,33 +2,17 @@ const assert = require("assert");
 
 const Node = (operator, value, left, right) => {
   const result = function () {
-    switch (operator) {
-      case "+":
-        return left.result() + right.result();
-      case "-":
-        return left.result() - right.result();
-      case "x":
-        return left.result() * right.result();
-      case "÷":
-        return left.result() / right.result();
-      default:
-        return value;
+    if (operator in operators) {
+      return operators[operator](left.result(), right.result());
     }
+    else return value;
   };
 
   const toString = function () {
-    switch (operator) {
-      case "+":
-        return `(${left.toString()} + ${right.toString()})`;
-      case "-":
-        return `(${left.toString()} - ${right.toString()})`;
-      case "x":
-        return `(${left.toString()} x ${right.toString()})`;
-      case "÷":
-        return `(${left.toString()} ÷ ${right.toString()})`;
-      default:
-        return value.toString();
+    if (operator in operators) {
+      return `(${left.toString()} ` + operator.toString() + ` ${right.toString()})`;
     }
+    else return value.toString();
   };
 
   return {
@@ -39,6 +23,25 @@ const Node = (operator, value, left, right) => {
     result,
     toString
   };
+};
+
+  /**
+   * Split out operators to a dictionary to comply with the Open-Closed principle
+   * Additional operators can be added or removed without modifying the tree
+   */
+const operators = {
+	'x': function(left, right) {
+		return left * right;
+	},
+	'÷': function(left, right) {
+		return left / right;
+	},
+	'+': function(left, right) {
+		return left + right;
+	},
+	'-': function(left, right) {
+		return left - right;
+	}
 };
 
 /** @class TreeFactory used to easily generate a Tree representation. */
@@ -69,14 +72,12 @@ class TreeFactory {
           nodeStack.push(Node(operatorStack.pop(), null, left, right));
           numExpressions--;
           break;
-        case '+':
-        case '-':
-        case 'x':
-        case '÷':
-          operatorStack.push(character);
-          break;
         default:
-          nodeStack.push(Node(null, Number(character), null, null));
+          if (character in operators) {
+            operatorStack.push(character);
+          } else {
+            nodeStack.push(Node(null, Number(character), null, null));
+          }
           break;
       }
     }
