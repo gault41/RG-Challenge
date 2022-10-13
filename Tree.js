@@ -53,6 +53,20 @@ class NodePrinter {
     }
     else return node.value.toString();
   };
+  
+  static printPreFix = function (node) {
+    if (node.operator in operators) {
+      return `(`+ node.operator.toString() +` ${this.printPreFix(node.left)} ${this.printPreFix(node.right)})`;
+    }
+    else return node.value.toString();
+  };
+  
+  static printPostFix = function (node) {
+    if (node.operator in operators) {
+      return `(${this.printPostFix(node.left)} ${this.printPostFix(node.right)} `+ node.operator.toString() +`)`;
+    }
+    else return node.value.toString();
+  };
 }
 
 /** @class TreeFactory used to easily generate a Tree representation. */
@@ -111,7 +125,13 @@ assert.strictEqual(17, TreeFactory.parse("((5 x 3) + 2)").result());
 assert.strictEqual(17, TreeFactory.parse("((5  3 x)  2 +)").result());
 assert.strictEqual(17, TreeFactory.parse("(+ (x 5  3)  2)").result());
 
+// Test infix, prefix and postfix parsing
 assert.strictEqual("((5 x 3) + 2)", NodePrinter.print(TreeFactory.parse("((5 x 3) + 2)")));
 assert.strictEqual("((5 x 3) + 2)", NodePrinter.print(TreeFactory.parse("((5  3 x)  2 +)")));
 assert.strictEqual("((5 x 3) + 2)", NodePrinter.print(TreeFactory.parse("(+ (x 5  3)  2)")));
+
+// Test infix, prefix and postfix printing
+assert.strictEqual("((7 + ((3 - 2) x 5)) ÷ 6)", NodePrinter.print(TreeFactory.parse("((7 + ((3 - 2) x 5)) ÷ 6)")));
+assert.strictEqual("(÷ (+ 7 (x (- 3 2) 5)) 6)", NodePrinter.printPreFix(TreeFactory.parse("((7 + ((3 - 2) x 5)) ÷ 6)")));
+assert.strictEqual("((7 ((3 2 -) 5 x) +) 6 ÷)", NodePrinter.printPostFix(TreeFactory.parse("((7 + ((3 - 2) x 5)) ÷ 6)")));
 
