@@ -8,20 +8,12 @@ const Node = (operator, value, left, right) => {
     else return value;
   };
 
-  const toString = function () {
-    if (operator in operators) {
-      return `(${left.toString()} ` + operator.toString() + ` ${right.toString()})`;
-    }
-    else return value.toString();
-  };
-
   return {
     operator,
     value,
     left,
     right,
-    result,
-    toString
+    result
   };
 };
 
@@ -43,6 +35,25 @@ const operators = {
 		return left - right;
 	}
 };
+
+/** @class NodePrinter used to handle printing of an expression tree in a number of formats. 
+ * In future can be expanded to handle alternative requirements
+*/
+class NodePrinter {
+
+  /**
+   * Recursively prints an expression tree from the given tree node
+   * 
+   * @param {Node} node The node of the tree to be printed 
+   * @return {String} The infix representation of the tree as a string
+   */
+  static print = function (node) {
+    if (node.operator in operators) {
+      return `(${this.print(node.left)} ` + node.operator.toString() + ` ${this.print(node.right)})`;
+    }
+    else return node.value.toString();
+  };
+}
 
 /** @class TreeFactory used to easily generate a Tree representation. */
 class TreeFactory {
@@ -86,7 +97,7 @@ class TreeFactory {
 }
 
 // Original tests
-assert.strictEqual("((7 + ((3 - 2) x 5)) ÷ 6)", TreeFactory.parse("((7 + ((3 - 2) x 5)) ÷ 6)").toString());
+assert.strictEqual("((7 + ((3 - 2) x 5)) ÷ 6)", NodePrinter.print(TreeFactory.parse("((7 + ((3 - 2) x 5)) ÷ 6)")));
 assert.strictEqual(2, TreeFactory.parse("((7 + ((3 - 2) x 5)) ÷ 6)").result());
 
 // Results tests
@@ -100,7 +111,7 @@ assert.strictEqual(17, TreeFactory.parse("((5 x 3) + 2)").result());
 assert.strictEqual(17, TreeFactory.parse("((5  3 x)  2 +)").result());
 assert.strictEqual(17, TreeFactory.parse("(+ (x 5  3)  2)").result());
 
-assert.strictEqual("((5 x 3) + 2)", TreeFactory.parse("((5 x 3) + 2)").toString());
-assert.strictEqual("((5 x 3) + 2)", TreeFactory.parse("((5  3 x)  2 +)").toString());
-assert.strictEqual("((5 x 3) + 2)", TreeFactory.parse("(+ (x 5  3)  2)").toString());
+assert.strictEqual("((5 x 3) + 2)", NodePrinter.print(TreeFactory.parse("((5 x 3) + 2)")));
+assert.strictEqual("((5 x 3) + 2)", NodePrinter.print(TreeFactory.parse("((5  3 x)  2 +)")));
+assert.strictEqual("((5 x 3) + 2)", NodePrinter.print(TreeFactory.parse("(+ (x 5  3)  2)")));
 
